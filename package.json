@@ -1,0 +1,24 @@
+{
+  "name": "pong",
+  "version": "1.0.0",
+  "main": "app.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node src/app.js"
+  },
+  "dependencies": {
+    "express": "^4.14.1",
+    "socket.io": "^1.7.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.23.0",
+    "babel-preset-env": "^1.1.10",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-cli": "^1.2.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-sourcemaps": "^2.4.1",
+    "gulp-uglify": "^2.0.1",
+    "standard": "^8.6.0"
+  }
+}
