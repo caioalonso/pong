@@ -12,8 +12,6 @@ const Text = PIXI.Text
 
 var renderer, stage, rectangle, rectangle2
 
-var bgtimer
-
 function setup () {
   renderer = PIXI.autoDetectRenderer(256, 256)
   renderer.view.style.position = 'absolute'
@@ -29,7 +27,7 @@ function setup () {
   line.lineStyle(4, 0xFFFFFF, 0.2)
   line.moveTo(0, 0)
   line.lineTo(0, renderer.height)
-  line.x = renderer.width/2
+  line.x = renderer.width / 2
   line.y = 0
   stage.addChild(line)
 
@@ -47,7 +45,7 @@ function setup () {
         fontSize: '4vw',
         fill: 'white'
       })
-      message.position.set(renderer.width/2 + centerSpacing, topPadding)
+      message.position.set(renderer.width / 2 + centerSpacing, topPadding)
       stage.addChild(message)
 
       message2 = new Text('0', {
@@ -55,7 +53,7 @@ function setup () {
         fontSize: '4vw',
         fill: 'white'
       })
-      message2.position.set(renderer.width/2 - message2.width - centerSpacing, topPadding)
+      message2.position.set(renderer.width / 2 - message2.width - centerSpacing, topPadding)
       stage.addChild(message2)
     }
   })
@@ -79,25 +77,25 @@ function setup () {
   var up = keyboard(38)
   var down = keyboard(40)
 
-  up.press = () => rectangle.vy = -7
+  up.press = () => { rectangle.vy = -7 }
 
   up.release = () => {
-    if(!down.isDown) {
+    if (!down.isDown) {
       rectangle.vy = 0
     }
   }
 
-  down.press = () => rectangle.vy = 7
+  down.press = () => { rectangle.vy = 7 }
 
   down.release = () => {
-    if(!up.isDown) {
+    if (!up.isDown) {
       rectangle.vy = 0
     }
   }
 
-  bgtimer = setInterval(() => {
+  setInterval(() => {
     var info = {y: rectangle.y}
-    socket.json.emit('sync', info);
+    socket.json.emit('sync', info)
   }, 50)
 
   renderer.render(stage)
@@ -108,85 +106,77 @@ var collision
 
 function gameLoop () {
   requestAnimationFrame(gameLoop)
-  contain(rectangle, {x:0, y:0, width: renderer.width, height: renderer.height})
+  contain(rectangle, {x: 0, y: 0, width: renderer.width, height: renderer.height})
   rectangle.y += rectangle.vy
   renderer.render(stage)
 }
 
 setup()
 
-window.onresize = function (event){
+window.onresize = function (event) {
   var w = window.innerWidth
   var h = window.innerHeight
-  renderer.view.style.width = w + "px"
-  renderer.view.style.height = h + "px"
-  renderer.resize(w,h)
+  renderer.view.style.width = w + 'px'
+  renderer.view.style.height = h + 'px'
+  renderer.resize(w, h)
 }
 
-function keyboard(keyCode) {
-  var key = {};
-  key.code = keyCode;
-  key.isDown = false;
-  key.isUp = true;
-  key.press = undefined;
-  key.release = undefined;
-  //The `downHandler`
-  key.downHandler = function(event) {
+function keyboard (keyCode) {
+  var key = {}
+  key.code = keyCode
+  key.isDown = false
+  key.isUp = true
+  key.press = undefined
+  key.release = undefined
+  key.downHandler = (event) => {
     if (event.keyCode === key.code) {
-      if (key.isUp && key.press) key.press();
-      key.isDown = true;
-      key.isUp = false;
-      event.preventDefault();
+      if (key.isUp && key.press) key.press()
+      key.isDown = true
+      key.isUp = false
+      event.preventDefault()
     }
-  };
+  }
 
-  //The `upHandler`
-  key.upHandler = function(event) {
+  key.upHandler = (event) => {
     if (event.keyCode === key.code) {
-      if (key.isDown && key.release) key.release();
-      key.isDown = false;
-      key.isUp = true;
-      event.preventDefault();
+      if (key.isDown && key.release) key.release()
+      key.isDown = false
+      key.isUp = true
+      event.preventDefault()
     }
-  };
+  }
 
-  //Attach event listeners
   window.addEventListener(
-    "keydown", key.downHandler.bind(key), false
-  );
+    'keydown', key.downHandler.bind(key), false
+  )
   window.addEventListener(
-    "keyup", key.upHandler.bind(key), false
-  );
-  return key;
+    'keyup', key.upHandler.bind(key), false
+  )
+  return key
 }
 
-function contain(sprite, container) {
-  var collision = undefined;
+function contain (sprite, container) {
+  var collision
 
-  //Left
   if (sprite.x < container.x) {
-    sprite.x = container.x;
-    collision = "left";
+    sprite.x = container.x
+    collision = 'left'
   }
 
-  //Top
   if (sprite.y < container.y) {
-    sprite.y = container.y;
-    collision = "top";
+    sprite.y = container.y
+    collision = 'top'
   }
 
-  //Right
   if (sprite.x + sprite.width > container.width) {
-    sprite.x = container.width - sprite.width;
-    collision = "right";
+    sprite.x = container.width - sprite.width
+    collision = 'right'
   }
 
-  //Bottom
   if (sprite.y + sprite.height > container.height) {
-    sprite.y = container.height - sprite.height;
-    collision = "bottom";
+    sprite.y = container.height - sprite.height
+    collision = 'bottom'
   }
 
-  //Return the `collision` value
-  return collision;
+  return collision
 }
