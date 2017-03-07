@@ -1,9 +1,9 @@
+@font-face {
+  font-family: FFF;
+  src: url('fonts/fff.ttf');
+}
+
 body {
   margin:0;
   padding:0;
-}
-
-@font-face {
-  font-family: 'FFF Forward';
-  src: url('fonts/fff.ttf');
 }

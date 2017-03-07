@@ -11,5 +11,7 @@ app.use(express.static('public'))
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, '/public/index.html')))
 
 io.on('connection', (socket) => {
-  socket.emit('welcome', { message: 'Welcome!', id: socket.id })
+  socket.on('sync', function(msg) {
+    socket.broadcast.emit('sync', msg)
+  });
 })

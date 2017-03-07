@@ -2,7 +2,8 @@
 'use strict'
 
 var socket = io()
-socket.on('welcome', data => {
+socket.on('sync', data => {
+  rectangle2.y = data.y
 })
 
 const Graphics = PIXI.Graphics
@@ -10,6 +11,8 @@ const Container = PIXI.Container
 const Text = PIXI.Text
 
 var renderer, stage, rectangle, rectangle2
+
+var bgtimer
 
 function setup () {
   renderer = PIXI.autoDetectRenderer(256, 256)
@@ -33,19 +36,29 @@ function setup () {
   var centerSpacing = 60
   var topPadding = 0
 
-  var message = new Text(
-    '0',
-    {fontFamily: 'FFF Forward', fontSize: '4vw', fill: 'white'}
-  )
-  message.position.set(renderer.width/2 + centerSpacing, topPadding)
-  stage.addChild(message)
+  var message, message2
+  WebFont.load({
+    custom: {
+      families: ['FFF']
+    },
+    active: () => {
+      message = new Text('0', {
+        fontFamily: 'FFF',
+        fontSize: '4vw',
+        fill: 'white'
+      })
+      message.position.set(renderer.width/2 + centerSpacing, topPadding)
+      stage.addChild(message)
 
-  var message2 = new Text(
-    '0',
-    {fontFamily: 'FFF Forward', fontSize: '4vw', fill: 'white'}
-  )
-  message2.position.set(renderer.width/2 - message2.width - centerSpacing, topPadding)
-  stage.addChild(message2)
+      message2 = new Text('0', {
+        fontFamily: 'FFF',
+        fontSize: '4vw',
+        fill: 'white'
+      })
+      message2.position.set(renderer.width/2 - message2.width - centerSpacing, topPadding)
+      stage.addChild(message2)
+    }
+  })
 
   rectangle = new Graphics()
   rectangle.beginFill(0xFFFFFF)
@@ -81,6 +94,11 @@ function setup () {
       rectangle.vy = 0
     }
   }
+
+  bgtimer = setInterval(() => {
+    var info = {y: rectangle.y}
+    socket.json.emit('sync', info);
+  }, 50)
 
   renderer.render(stage)
   gameLoop()
@@ -118,8 +136,8 @@ function keyboard(keyCode) {
       if (key.isUp && key.press) key.press();
       key.isDown = true;
       key.isUp = false;
+      event.preventDefault();
     }
-    event.preventDefault();
   };
 
   //The `upHandler`
@@ -128,8 +146,8 @@ function keyboard(keyCode) {
       if (key.isDown && key.release) key.release();
       key.isDown = false;
       key.isUp = true;
+      event.preventDefault();
     }
-    event.preventDefault();
   };
 
   //Attach event listeners
