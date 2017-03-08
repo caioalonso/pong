@@ -69,26 +69,6 @@ function setup () {
   rectangle2.position.set(renderer.width - rectangle2.width - rectMargin, 0)
   stage.addChild(rectangle2)
 
-  rectangle.vy = 0
-
-  var up = keyboard(38)
-  var down = keyboard(40)
-
-  up.press = () => { rectangle.vy = -7 }
-
-  up.release = () => {
-    if (!down.isDown) {
-      rectangle.vy = 0
-    }
-  }
-
-  down.press = () => { rectangle.vy = 7 }
-
-  down.release = () => {
-    if (!up.isDown) {
-      rectangle.vy = 0
-    }
-  }
 
   setInterval(() => {
     var info = {y: rectangle.y}
@@ -133,8 +113,8 @@ var collision
 
 function gameLoop () {
   requestAnimationFrame(gameLoop)
+  rectangle.y = renderer.plugins.interaction.mouse.global.y
   contain(rectangle, {x: 0, y: 0, width: renderer.width, height: renderer.height})
-  rectangle.y += rectangle.vy
   renderer.render(stage)
 }
 
