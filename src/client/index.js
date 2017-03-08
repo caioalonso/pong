@@ -1,25 +1,27 @@
-/* global io PIXI */
 'use strict'
 
-var socket = io()
+import 'babel-polyfill'
+import IO from 'socket.io-client'
+import Bump from 'bump.js'
+import WebFont from 'webfontloader'
+import {Graphics, Container, Text, TextStyle, autoDetectRenderer} from 'pixi.js'
+
+var socket = IO()
 socket.on('sync', data => {
   rectangle2.y = data.y
 })
 
-const Graphics = PIXI.Graphics
-const Container = PIXI.Container
-const Text = PIXI.Text
-
-var renderer, stage, line, rectangle, rectangle2
+var renderer, stage, line, rectangle, rectangle2, ball
 var message, message2
 var centerSpacing = 60
 var topPadding = 0
 var rectWidth = 10
 var rectHeight = () => window.innerHeight / 10
 var rectMargin = 20
+var ballSize = 10
 
 function setup () {
-  renderer = PIXI.autoDetectRenderer(256, 256)
+  renderer = autoDetectRenderer(256, 256)
   renderer.view.style.position = 'absolute'
   renderer.view.style.display = 'block'
   renderer.autoResize = true
@@ -69,6 +71,13 @@ function setup () {
   rectangle2.position.set(renderer.width - rectangle2.width - rectMargin, 0)
   stage.addChild(rectangle2)
 
+  ball = new Graphics()
+  ball.beginFill(0xFFFFFF)
+  ball.drawRect(0, 0, ballSize, ballSize)
+  ball.endFill()
+  ball.position.set(300, 300)
+  ball.vx = -2
+  stage.addChild(ball)
 
   setInterval(() => {
     var info = {y: rectangle.y}
@@ -92,13 +101,13 @@ function resizeInterface (event) {
   line.y = 0
   line.width = Math.ceil(w / 1000 + 1)
 
-  message.style = new PIXI.TextStyle({
+  message.style = new TextStyle({
     fontFamily: 'FFF',
     fontSize: w/30 + 'px',
     fill: 'white'
   })
   message.position.set(renderer.width / 2 + centerSpacing, topPadding)
-  message2.style = new PIXI.TextStyle({
+  message2.style = new TextStyle({
     fontFamily: 'FFF',
     fontSize: w/30 + 'px',
     fill: 'white'
@@ -115,6 +124,7 @@ function gameLoop () {
   requestAnimationFrame(gameLoop)
   rectangle.y = renderer.plugins.interaction.mouse.global.y
   contain(rectangle, {x: 0, y: 0, width: renderer.width, height: renderer.height})
+  ball.x += ball.vx
   renderer.render(stage)
 }
 
@@ -180,4 +190,7 @@ function contain (sprite, container) {
   }
 
   return collision
+}
+
+function ballCollision (ball, paddle) {
 }

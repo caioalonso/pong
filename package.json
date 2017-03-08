@@ -4,21 +4,43 @@
   "main": "app.js",
   "license": "MIT",
   "scripts": {
-    "start": "node src/app.js"
+    "start": "yarn dev:start",
+    "dev:start": "nodemon -e js,jsx --ignore lib --ignore dist --exec babel-node src/server",
+    "dev:wds": "webpack-dev-server --progress",
+    "prod:build": "rimraf lib dist && babel src -d lib --ignore .test.js && cross-env NODE_ENV=production webpack -p --progress",
+    "prod:start": "cross-env NODE_ENV=production pm2 start lib/server && pm2 logs",
+    "prod:stop": "pm2 delete all",
+    "lint": "standard src webpack.config.babel.js --ext .js,.jsx",
+    "test": "yarn lint",
+    "precommit": "yarn test",
+    "prepush": "yarn test && yarn prod:build"
   },
   "dependencies": {
+    "babel-polyfill": "^6.23.0",
+    "bump.js": "^1.0.3",
     "express": "^4.14.1",
-    "socket.io": "^1.7.3"
+    "pixi.js": "^4.4.1",
+    "socket.io": "^1.7.3",
+    "webfontloader": "^1.6.27"
   },
   "devDependencies": {
     "babel-cli": "^6.23.0",
+    "babel-core": "^6.23.1",
+    "babel-loader": "^6.4.0",
     "babel-preset-env": "^1.1.10",
+    "cross-env": "^3.2.3",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-cli": "^1.2.2",
     "gulp-concat": "^2.6.1",
     "gulp-sourcemaps": "^2.4.1",
     "gulp-uglify": "^2.0.1",
-    "standard": "^8.6.0"
+    "husky": "^0.13.2",
+    "nodemon": "^1.11.0",
+    "pm2": "^2.4.2",
+    "rimraf": "^2.6.1",
+    "standard": "^8.6.0",
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.4.1"
   }
 }

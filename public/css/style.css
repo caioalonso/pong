@@ -1,6 +1,6 @@
 @font-face {
   font-family: FFF;
-  src: url('fonts/fff.ttf');
+  src: url('../fonts/fff.ttf');
 }
 
 body {
