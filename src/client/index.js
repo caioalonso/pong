@@ -12,13 +12,14 @@ socket.on('sync', data => {
 })
 
 var renderer, stage, line, rectangle, rectangle2, ball
+var bump
 var message, message2
 var centerSpacing = 60
 var topPadding = 0
 var rectWidth = 10
 var rectHeight = () => window.innerHeight / 10
 var rectMargin = 20
-var ballSize = 10
+var ballSize = () => window.innerHeight / 100
 
 function setup () {
   renderer = autoDetectRenderer(256, 256)
@@ -26,6 +27,7 @@ function setup () {
   renderer.view.style.display = 'block'
   renderer.autoResize = true
   renderer.resize(window.innerWidth, window.innerHeight)
+  bump = new Bump(PIXI)
 
   document.body.appendChild(renderer.view)
 
@@ -35,27 +37,19 @@ function setup () {
   line.lineStyle(4, 0x333333)
   stage.addChild(line)
 
-  WebFont.load({
-    custom: {
-      families: ['FFF']
-    },
-    active: () => {
-      message = new Text('0', {
-        fontFamily: 'FFF',
-        fontSize: '1em',
-        fill: 'white'
-      })
-      stage.addChild(message)
-
-      message2 = new Text('0', {
-        fontFamily: 'FFF',
-        fontSize: '1em',
-        fill: 'white'
-      })
-      stage.addChild(message2)
-      resizeInterface()
-    }
+  message = new Text('0', {
+    fontFamily: 'FFF',
+    fontSize: '1em',
+    fill: 'white'
   })
+  stage.addChild(message)
+
+  message2 = new Text('0', {
+    fontFamily: 'FFF',
+    fontSize: '1em',
+    fill: 'white'
+  })
+  stage.addChild(message2)
 
   rectangle = new Graphics()
   rectangle.beginFill(0xFFFFFF)
@@ -73,10 +67,11 @@ function setup () {
 
   ball = new Graphics()
   ball.beginFill(0xFFFFFF)
-  ball.drawRect(0, 0, ballSize, ballSize)
+  ball.drawRect(0, 0, ballSize(), ballSize())
   ball.endFill()
-  ball.position.set(300, 300)
-  ball.vx = -2
+  ball.position.set(renderer.width / 2, 300)
+  ball.vx = -20
+  ball.vy = -1
   stage.addChild(ball)
 
   setInterval(() => {
@@ -84,6 +79,8 @@ function setup () {
     socket.json.emit('sync', info)
   }, 50)
 
+  window.onresize = resizeInterface
+  resizeInterface()
   renderer.render(stage)
   gameLoop()
 }
@@ -116,21 +113,39 @@ function resizeInterface (event) {
 
   rectangle.height = rectHeight()
   rectangle2.height = rectHeight()
+  ball.height = ballSize()
+  ball.width = ballSize()
 }
 
 var collision
 
 function gameLoop () {
+  var container = {x: 0, y: 0, width: renderer.width, height: renderer.height}
   requestAnimationFrame(gameLoop)
   rectangle.y = renderer.plugins.interaction.mouse.global.y
-  contain(rectangle, {x: 0, y: 0, width: renderer.width, height: renderer.height})
-  ball.x += ball.vx
+  contain(rectangle, container)
+  bump.hit(ball, rectangle, true, true, false, (collision, platform) => {
+    console.log(collision)
+    console.log(platform)
+  })
+  bump.contain(ball, container, true, (collision, platform) => {
+    console.log(collision)
+    console.log(platform)
+  })
+  ball.x += ball.vx/2
+  ball.y += ball.vy/2
+  bump.hit(ball, rectangle, true, true, false, (collision, platform) => {
+    console.log(collision)
+    console.log(platform)
+  })
+  bump.contain(ball, container, true, (collision, platform) => {
+    console.log(collision)
+    console.log(platform)
+  })
+  ball.x += ball.vx/2
+  ball.y += ball.vy/2
   renderer.render(stage)
 }
-
-setup()
-
-window.onresize = resizeInterface
 
 function keyboard (keyCode) {
   var key = {}
@@ -192,5 +207,10 @@ function contain (sprite, container) {
   return collision
 }
 
-function ballCollision (ball, paddle) {
-}
+WebFont.load({
+  custom: {
+    families: ['FFF']
+  },
+  active: setup
+})
+
