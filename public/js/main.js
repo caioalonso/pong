@@ -10,7 +10,13 @@ const Graphics = PIXI.Graphics
 const Container = PIXI.Container
 const Text = PIXI.Text
 
-var renderer, stage, rectangle, rectangle2
+var renderer, stage, line, rectangle, rectangle2
+var message, message2
+var centerSpacing = 60
+var topPadding = 0
+var rectWidth = 10
+var rectHeight = () => window.innerHeight / 10
+var rectMargin = 20
 
 function setup () {
   renderer = PIXI.autoDetectRenderer(256, 256)
@@ -23,18 +29,10 @@ function setup () {
 
   stage = new Container()
 
-  var line = new Graphics()
-  line.lineStyle(4, 0xFFFFFF, 0.2)
-  line.moveTo(0, 0)
-  line.lineTo(0, renderer.height)
-  line.x = renderer.width / 2
-  line.y = 0
+  line = new Graphics()
+  line.lineStyle(4, 0x333333)
   stage.addChild(line)
 
-  var centerSpacing = 60
-  var topPadding = 0
-
-  var message, message2
   WebFont.load({
     custom: {
       families: ['FFF']
@@ -42,34 +40,33 @@ function setup () {
     active: () => {
       message = new Text('0', {
         fontFamily: 'FFF',
-        fontSize: '4vw',
+        fontSize: '1em',
         fill: 'white'
       })
-      message.position.set(renderer.width / 2 + centerSpacing, topPadding)
       stage.addChild(message)
 
       message2 = new Text('0', {
         fontFamily: 'FFF',
-        fontSize: '4vw',
+        fontSize: '1em',
         fill: 'white'
       })
-      message2.position.set(renderer.width / 2 - message2.width - centerSpacing, topPadding)
       stage.addChild(message2)
+      resizeInterface()
     }
   })
 
   rectangle = new Graphics()
   rectangle.beginFill(0xFFFFFF)
-  rectangle.drawRect(0, 0, 20, 200)
+  rectangle.drawRect(0, 0, rectWidth, rectHeight())
   rectangle.endFill()
-  rectangle.position.set(0, 0)
+  rectangle.position.set(rectMargin, 0)
   stage.addChild(rectangle)
 
   rectangle2 = new Graphics()
   rectangle2.beginFill(0xFFFFFF)
-  rectangle2.drawRect(0, 0, 20, 200)
+  rectangle2.drawRect(0, 0, rectWidth, rectHeight())
   rectangle2.endFill()
-  rectangle2.position.set(renderer.width - rectangle2.width, 0)
+  rectangle2.position.set(renderer.width - rectangle2.width - rectMargin, 0)
   stage.addChild(rectangle2)
 
   rectangle.vy = 0
@@ -102,6 +99,36 @@ function setup () {
   gameLoop()
 }
 
+function resizeInterface (event) {
+  var w = window.innerWidth
+  var h = window.innerHeight
+  renderer.view.style.width = w + 'px'
+  renderer.view.style.height = h + 'px'
+  renderer.resize(w, h)
+
+  line.moveTo(0, 0)
+  line.lineTo(0, h)
+  line.x = w / 2
+  line.y = 0
+  line.width = Math.ceil(w / 1000 + 1)
+
+  message.style = new PIXI.TextStyle({
+    fontFamily: 'FFF',
+    fontSize: w/30 + 'px',
+    fill: 'white'
+  })
+  message.position.set(renderer.width / 2 + centerSpacing, topPadding)
+  message2.style = new PIXI.TextStyle({
+    fontFamily: 'FFF',
+    fontSize: w/30 + 'px',
+    fill: 'white'
+  })
+  message2.position.set(renderer.width / 2 - message2.width - centerSpacing, topPadding)
+
+  rectangle.height = rectHeight()
+  rectangle2.height = rectHeight()
+}
+
 var collision
 
 function gameLoop () {
@@ -113,13 +140,7 @@ function gameLoop () {
 
 setup()
 
-window.onresize = function (event) {
-  var w = window.innerWidth
-  var h = window.innerHeight
-  renderer.view.style.width = w + 'px'
-  renderer.view.style.height = h + 'px'
-  renderer.resize(w, h)
-}
+window.onresize = resizeInterface
 
 function keyboard (keyCode) {
   var key = {}
