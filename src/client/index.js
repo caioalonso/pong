@@ -11,9 +11,10 @@ socket.on('sync', data => {
   rectangle2.y = data.y
 })
 
-var renderer, stage, line, rectangle, rectangle2, ball
+var renderer, stage, topBar, bottomBar, line, rectangle, rectangle2, ball
 var bump
 var message, message2
+var barHeight = 10
 var centerSpacing = 60
 var topPadding = 0
 var rectWidth = 10
@@ -22,33 +23,46 @@ var rectMargin = 20
 var ballSize = () => window.innerHeight / 100
 
 function setup () {
-  renderer = autoDetectRenderer(256, 256)
-  renderer.view.style.position = 'absolute'
-  renderer.view.style.display = 'block'
-  renderer.autoResize = true
-  renderer.resize(window.innerWidth, window.innerHeight)
+  renderer = autoDetectRenderer()
+  stage = new Container()
   bump = new Bump(PIXI)
 
   document.body.appendChild(renderer.view)
 
-  stage = new Container()
 
   line = new Graphics()
   line.lineStyle(4, 0x333333)
+  line.moveTo(0, 0)
+  line.lineTo(0, renderer.height)
+  line.x = renderer.width / 2
+  line.y = 0
   stage.addChild(line)
 
-  message = new Text('0', {
+  topBar = new Graphics()
+  topBar.beginFill(0xFFFFFF)
+  topBar.drawRect(0, 0, renderer.width, barHeight)
+  topBar.endFill()
+  topBar.position.set(0, 0)
+  stage.addChild(topBar)
+
+  bottomBar = new Graphics()
+  bottomBar.beginFill(0xFFFFFF)
+  bottomBar.drawRect(0, 0, renderer.width, barHeight)
+  bottomBar.endFill()
+  bottomBar.position.set(0, renderer.height - barHeight)
+  stage.addChild(bottomBar)
+
+  var scoreStyle = {
     fontFamily: 'FFF',
-    fontSize: '1em',
+    fontSize: '32px',
     fill: 'white'
-  })
+  }
+  message = new Text('0', scoreStyle)
+  message.position.set(renderer.width / 2 + centerSpacing, topPadding)
   stage.addChild(message)
 
-  message2 = new Text('0', {
-    fontFamily: 'FFF',
-    fontSize: '1em',
-    fill: 'white'
-  })
+  message2 = new Text('0', scoreStyle)
+  message2.position.set(renderer.width / 2 - message2.width - centerSpacing, topPadding)
   stage.addChild(message2)
 
   rectangle = new Graphics()
@@ -70,7 +84,7 @@ function setup () {
   ball.drawRect(0, 0, ballSize(), ballSize())
   ball.endFill()
   ball.position.set(renderer.width / 2, 300)
-  ball.vx = -20
+  ball.vx = -2
   ball.vy = -1
   stage.addChild(ball)
 
@@ -86,35 +100,11 @@ function setup () {
 }
 
 function resizeInterface (event) {
-  var w = window.innerWidth
-  var h = window.innerHeight
-  renderer.view.style.width = w + 'px'
-  renderer.view.style.height = h + 'px'
-  renderer.resize(w, h)
-
-  line.moveTo(0, 0)
-  line.lineTo(0, h)
-  line.x = w / 2
-  line.y = 0
-  line.width = Math.ceil(w / 1000 + 1)
-
-  message.style = new TextStyle({
-    fontFamily: 'FFF',
-    fontSize: w/30 + 'px',
-    fill: 'white'
-  })
-  message.position.set(renderer.width / 2 + centerSpacing, topPadding)
-  message2.style = new TextStyle({
-    fontFamily: 'FFF',
-    fontSize: w/30 + 'px',
-    fill: 'white'
-  })
-  message2.position.set(renderer.width / 2 - message2.width - centerSpacing, topPadding)
-
-  rectangle.height = rectHeight()
-  rectangle2.height = rectHeight()
-  ball.height = ballSize()
-  ball.width = ballSize()
+  var ratio = Math.min(window.innerWidth/800, window.innerHeight/600)
+  var newWidth = Math.ceil(800 * ratio)
+  var newHeight = Math.ceil(600 * ratio)
+  renderer.view.style.width = newWidth + 'px'
+  renderer.view.style.height = newHeight + 'px'
 }
 
 var collision
@@ -124,26 +114,14 @@ function gameLoop () {
   requestAnimationFrame(gameLoop)
   rectangle.y = renderer.plugins.interaction.mouse.global.y
   contain(rectangle, container)
-  bump.hit(ball, rectangle, true, true, false, (collision, platform) => {
-    console.log(collision)
-    console.log(platform)
-  })
-  bump.contain(ball, container, true, (collision, platform) => {
-    console.log(collision)
-    console.log(platform)
-  })
+  bump.hit(ball, rectangle, true, true, false)
   ball.x += ball.vx/2
   ball.y += ball.vy/2
-  bump.hit(ball, rectangle, true, true, false, (collision, platform) => {
-    console.log(collision)
-    console.log(platform)
-  })
-  bump.contain(ball, container, true, (collision, platform) => {
-    console.log(collision)
-    console.log(platform)
-  })
+  bump.hit(ball, rectangle, true, true, false)
   ball.x += ball.vx/2
   ball.y += ball.vy/2
+  bump.hit(ball, topBar, true, true, false)
+  bump.hit(ball, bottomBar, true, true, false)
   renderer.render(stage)
 }
 
