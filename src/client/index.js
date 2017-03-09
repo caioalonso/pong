@@ -29,7 +29,6 @@ function setup () {
 
   document.body.appendChild(renderer.view)
 
-
   line = new Graphics()
   line.lineStyle(4, 0x333333)
   line.moveTo(0, 0)
@@ -55,7 +54,7 @@ function setup () {
   var scoreStyle = {
     fontFamily: 'FFF',
     fontSize: '32px',
-    fill: 'white'
+    fill: '#AAAAAA'
   }
   message = new Text('0', scoreStyle)
   message.position.set(renderer.width / 2 + centerSpacing, topPadding)
@@ -70,6 +69,7 @@ function setup () {
   rectangle.drawRect(0, 0, rectWidth, rectHeight())
   rectangle.endFill()
   rectangle.position.set(rectMargin, 0)
+  rectangle.vy = 0
   stage.addChild(rectangle)
 
   rectangle2 = new Graphics()
@@ -84,9 +84,25 @@ function setup () {
   ball.drawRect(0, 0, ballSize(), ballSize())
   ball.endFill()
   ball.position.set(renderer.width / 2, 300)
-  ball.vx = -2
+  ball.vx = -5
   ball.vy = -1
   stage.addChild(ball)
+
+  var up = keyboard(38)
+  var down = keyboard(40)
+  up.press = () => rectangle.vy = -7
+  up.release = () => {
+    if(!down.isDown) {
+      rectangle.vy = 0
+    }
+  }
+
+  down.press = () => rectangle.vy = 7
+  down.release = () => {
+    if(!up.isDown) {
+      rectangle.vy = 0
+    }
+  }
 
   setInterval(() => {
     var info = {y: rectangle.y}
@@ -110,18 +126,24 @@ function resizeInterface (event) {
 var collision
 
 function gameLoop () {
-  var container = {x: 0, y: 0, width: renderer.width, height: renderer.height}
+  var container = {
+    x: 0,
+    y: topBar.height,
+    width: renderer.width,
+    height: renderer.height - topBar.height
+  }
   requestAnimationFrame(gameLoop)
-  rectangle.y = renderer.plugins.interaction.mouse.global.y
+
+  rectangle.y += rectangle.vy
   contain(rectangle, container)
+
   bump.hit(ball, rectangle, true, true, false)
-  ball.x += ball.vx/2
-  ball.y += ball.vy/2
-  bump.hit(ball, rectangle, true, true, false)
-  ball.x += ball.vx/2
-  ball.y += ball.vy/2
+  bump.hit(ball, rectangle2, true, true, false)
   bump.hit(ball, topBar, true, true, false)
   bump.hit(ball, bottomBar, true, true, false)
+  ball.x += ball.vx
+  ball.y += ball.vy
+
   renderer.render(stage)
 }
 

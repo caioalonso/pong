@@ -22,5 +22,5 @@ app.use(STATIC_PATH, express.static('public'))
 app.get('/', (req, res) => res.send(renderApp(APP_NAME)))
 
 io.on('connection', (socket) => {
-  socket.on('sync', (msg) => socket.broadcast.emit('sync', msg))
+  socket.on('sync', (msg) => io.emit('sync', msg))
 })
