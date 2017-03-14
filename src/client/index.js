@@ -80,9 +80,10 @@ function setup () {
   ball.beginFill(0xFFFFFF)
   ball.drawRect(0, 0, ballSize(), ballSize())
   ball.endFill()
-  ball.position.set(renderer.width / 2, renderer.height / 2)
-  ball.vx = -10
+  ball.position.set(renderer.width / 2, renderer.height / 2 - ball.height / 2)
+  ball.vx = -1
   ball.vy = 0
+  ball.speed = 5
   stage.addChild(ball)
 
   var up = keyboard(38)
@@ -131,8 +132,8 @@ function gameLoop () {
 
   rectangle.y += rectangle.vy
   contain(rectangle, container)
+  horizontalMovement(ball)
   verticalMovement(ball)
-  horizontalCollisions(ball)
 
   renderer.render(stage)
 }
@@ -167,7 +168,7 @@ function verticalMovement (ball) {
   var futureBall = getFutureBall(ball)
   var topColl = willCollideTop(futureBall, topBar)
   var bottomColl = willCollideBottom(futureBall, bottomBar)
-  var beforeCollision = ball.vy
+  var beforeCollision = ball.vy * ball.speed
   var afterCollision = 0
   var distance
   if (topColl) {
@@ -178,39 +179,62 @@ function verticalMovement (ball) {
   if (topColl|| bottomColl) {
     beforeCollision = distance
     ball.vy *= -1
-    afterCollision = ball.vy - distance
+    afterCollision = ball.vy * ball.speed - distance
   }
 
   ball.y += beforeCollision + afterCollision
 }
 
-function horizontalCollisions (ball) {
+function horizontalMovement (ball) {
   var futureBall = getFutureBall(ball)
   var leftColl = willCollideLeft(futureBall, rectangle)
   var rightColl = willCollideRight(futureBall, rectangle2)
-  var beforeCollision = ball.vx
-  var afterCollision = 0
+  var beforeCollision, afterCollision
   var distance
+  var collRect
   if (leftColl) {
     distance = deltaX(ball, rectangle)
+    collRect = rectangle
   } else if (rightColl) {
     distance = deltaX(ball, rectangle2)
+    collRect = rectangle2
   }
   if (leftColl || rightColl) {
     beforeCollision = distance
-    ball.vx *= -1
-    afterCollision = ball.vx - distance
+    ball.x += beforeCollision
+    changeDirection(ball, collRect)
+    afterCollision = ball.vx * ball.speed - distance
+    ball.x += afterCollision
+  } else {
+    ball.x += ball.vx * ball.speed
   }
-  ball.x += beforeCollision + afterCollision
 }
 
 function getFutureBall(ball) {
   return {
-    'y': ball.y + ball.vy,
-    'x': ball.x + ball.vx,
+    'y': ball.y + ball.vy * ball.speed,
+    'x': ball.x + ball.vx * ball.speed,
     'height': ball.height,
     'width': ball.width
   }
+}
+
+function changeDirection (ball, collRect) {
+  console.log(ball.vx)
+  var position = getCollisionPosition(ball, collRect)
+  var angle = (2*1 / collRect.height) * position - 1
+  var cos = Math.cos(angle);
+  var sin = Math.sin(angle);
+  if(ball.vx < 0) {
+    ball.vx = cos
+  } else {
+    ball.vx = -cos
+  }
+  ball.vy = sin
+}
+
+function getCollisionPosition (ball, collRect) {
+  return Math.max(0, ball.y - collRect.y + ball.height / 2)
 }
 
 function willCollideLeft (futureBall, obj) {
