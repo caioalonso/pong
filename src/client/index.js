@@ -245,11 +245,15 @@ function getCollisionPosition (ball, collRect) {
 }
 
 function willCollideLeft (futureBall, obj) {
-  return futureBall.x < obj.x + obj.width && deltaY(futureBall, obj) === 0
+  return futureBall.x < obj.x + obj.width
+    && deltaY(futureBall, obj) === 0
+    && deltaX(futureBall, obj) === 0
 }
 
 function willCollideRight (futureBall, obj) {
-  return futureBall.x > obj.x && deltaY(futureBall, obj) === 0
+  return futureBall.x > obj.x
+    && deltaY(futureBall, obj) === 0
+    && deltaX(futureBall, obj) === 0
 }
 
 function willCollideTop (futureBall, obj) {
@@ -261,8 +265,8 @@ function willCollideBottom (futureBall, obj) {
 }
 
 function deltaY (obj1, obj2) {
-  var isOnTop = obj1.y + obj1.height <= obj2.y
-  var isOnBottom = obj1.y >= obj2.y + obj2.height
+  var isOnTop    = obj1.y + obj1.height < obj2.y
+  var isOnBottom = obj2.y + obj2.height < obj1.y
   if (isOnTop) {
     return obj2.y - obj1.y - obj1.height
   } else if (isOnBottom) {
@@ -274,8 +278,8 @@ function deltaY (obj1, obj2) {
 }
 
 function deltaX (obj1, obj2) {
-  var isOnLeft = obj1.x + obj1.width <= obj2.x
-  var isOnRight = obj1.x >= obj2.x + obj2.width
+  var isOnLeft  = obj1.x + obj1.width < obj2.x
+  var isOnRight = obj2.x + obj2.width < obj1.x
   if (isOnLeft) {
     return obj2.x - obj1.x - obj1.width
   } else if (isOnRight) {
