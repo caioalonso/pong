@@ -202,6 +202,7 @@ function horizontalMovement (ball) {
   if (leftColl || rightColl) {
     beforeCollision = distance
     ball.x += beforeCollision
+    changeSpeed(ball)
     changeDirection(ball, collRect)
     afterCollision = ball.vx * ball.speed - distance
     ball.x += afterCollision
@@ -216,6 +217,12 @@ function getFutureBall(ball) {
     'x': ball.x + ball.vx * ball.speed,
     'height': ball.height,
     'width': ball.width
+  }
+}
+
+function changeSpeed (ball) {
+  if (ball.speed < 10) {
+    ball.speed += 1
   }
 }
 
