@@ -3,7 +3,8 @@
 import 'babel-polyfill'
 import IO from 'socket.io-client'
 import WebFont from 'webfontloader'
-import {Graphics, Container, Text, TextStyle, autoDetectRenderer} from 'pixi.js'
+import { Graphics, Container, Text, TextStyle, autoDetectRenderer } from 'pixi.js'
+import { GAME } from '../shared/config'
 
 var socket = IO()
 socket.on('sync', data => {
@@ -12,13 +13,6 @@ socket.on('sync', data => {
 
 var renderer, stage, topBar, bottomBar, line, rectangle, rectangle2, ball
 var message, message2
-var barHeight = 10
-var centerSpacing = 60
-var topPadding = 10
-var rectWidth = 10
-var rectHeight = () => window.innerHeight / 10
-var rectMargin = 20
-var ballSize = () => window.innerHeight / 100
 
 function setup () {
   renderer = autoDetectRenderer()
@@ -36,16 +30,16 @@ function setup () {
 
   topBar = new Graphics()
   topBar.beginFill(0xFFFFFF)
-  topBar.drawRect(0, 0, renderer.width, barHeight)
+  topBar.drawRect(0, 0, renderer.width, GAME.barHeight)
   topBar.endFill()
   topBar.position.set(0, 0)
   stage.addChild(topBar)
 
   bottomBar = new Graphics()
   bottomBar.beginFill(0xFFFFFF)
-  bottomBar.drawRect(0, 0, renderer.width, barHeight)
+  bottomBar.drawRect(0, 0, renderer.width, GAME.barHeight)
   bottomBar.endFill()
-  bottomBar.position.set(0, renderer.height - barHeight)
+  bottomBar.position.set(0, renderer.height - GAME.barHeight)
   stage.addChild(bottomBar)
 
   var scoreStyle = {
@@ -54,31 +48,31 @@ function setup () {
     fill: '#AAAAAA'
   }
   message = new Text('0', scoreStyle)
-  message.position.set(renderer.width / 2 + centerSpacing, topPadding)
+  message.position.set(renderer.width / 2 + GAME.centerSpacing, GAME.topPadding)
   stage.addChild(message)
 
   message2 = new Text('0', scoreStyle)
-  message2.position.set(renderer.width / 2 - message2.width - centerSpacing, topPadding)
+  message2.position.set(renderer.width / 2 - message2.width - GAME.centerSpacing, GAME.topPadding)
   stage.addChild(message2)
 
   rectangle = new Graphics()
   rectangle.beginFill(0xFFFFFF)
-  rectangle.drawRect(0, 0, rectWidth, rectHeight())
+  rectangle.drawRect(0, 0, GAME.rectWidth, GAME.rectHeight())
   rectangle.endFill()
-  rectangle.position.set(rectMargin, renderer.height / 2 - rectangle.height / 2)
+  rectangle.position.set(GAME.rectMargin, renderer.height / 2 - rectangle.height / 2)
   rectangle.vy = 0
   stage.addChild(rectangle)
 
   rectangle2 = new Graphics()
   rectangle2.beginFill(0xFFFFFF)
-  rectangle2.drawRect(0, 0, rectWidth, rectHeight())
+  rectangle2.drawRect(0, 0, GAME.rectWidth, GAME.rectHeight())
   rectangle2.endFill()
-  rectangle2.position.set(renderer.width - rectangle2.width - rectMargin, renderer.height / 2 - rectangle2.height / 2)
+  rectangle2.position.set(renderer.width - rectangle2.width - GAME.rectMargin, renderer.height / 2 - rectangle2.height / 2)
   stage.addChild(rectangle2)
 
   ball = new Graphics()
   ball.beginFill(0xFFFFFF)
-  ball.drawRect(0, 0, ballSize(), ballSize())
+  ball.drawRect(0, 0, GAME.ballSize(), GAME.ballSize())
   ball.endFill()
   ball.position.set(renderer.width / 2, renderer.height / 2 - ball.height / 2)
   ball.vx = -1
@@ -227,7 +221,6 @@ function changeSpeed (ball) {
 }
 
 function changeDirection (ball, collRect) {
-  console.log(ball.vx)
   var position = getCollisionPosition(ball, collRect)
   var angle = (2*1 / collRect.height) * position - 1
   var cos = Math.cos(angle);
