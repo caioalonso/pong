@@ -48,7 +48,7 @@ function oppositeIsPressed (keyName) {
   return toCheck.map((key) => key.isDown).reduce((prev, el) => prev || el)
 }
 
-export const registerAction = function (keyName, press, release) {
+export function registerAction (keyName, press, release) {
   for(let key of keys[keyName]) {
     key.press = press
     key.release = () => {
