@@ -5,6 +5,7 @@ import IO from 'socket.io-client'
 import WebFont from 'webfontloader'
 import { Graphics, Container, Text, TextStyle, autoDetectRenderer } from 'pixi.js'
 import { GAME } from '../shared/config'
+import { registerAction } from './keyboard'
 
 var socket = IO()
 socket.on('sync', data => {
@@ -80,21 +81,13 @@ function setup () {
   ball.speed = 5
   stage.addChild(ball)
 
-  var up = keyboard(38)
-  var down = keyboard(40)
-  up.press = () => rectangle.vy = -7
-  up.release = () => {
-    if(!down.isDown) {
-      rectangle.vy = 0
-    }
-  }
+  registerAction('up',
+  () => rectangle.vy = -7,
+  () => rectangle.vy = 0)
 
-  down.press = () => rectangle.vy = 7
-  down.release = () => {
-    if(!up.isDown) {
-      rectangle.vy = 0
-    }
-  }
+  registerAction('down',
+  () => rectangle.vy = 7,
+  () => rectangle.vy = 0)
 
   setInterval(() => {
     var info = {y: rectangle.y}
@@ -281,40 +274,6 @@ function deltaX (obj1, obj2) {
     // they're intersecting
     return 0
   }
-}
-
-function keyboard (keyCode) {
-  var key = {}
-  key.code = keyCode
-  key.isDown = false
-  key.isUp = true
-  key.press = undefined
-  key.release = undefined
-  key.downHandler = (event) => {
-    if (event.keyCode === key.code) {
-      if (key.isUp && key.press) key.press()
-      key.isDown = true
-      key.isUp = false
-      event.preventDefault()
-    }
-  }
-
-  key.upHandler = (event) => {
-    if (event.keyCode === key.code) {
-      if (key.isDown && key.release) key.release()
-      key.isDown = false
-      key.isUp = true
-      event.preventDefault()
-    }
-  }
-
-  window.addEventListener(
-    'keydown', key.downHandler.bind(key), false
-  )
-  window.addEventListener(
-    'keyup', key.upHandler.bind(key), false
-  )
-  return key
 }
 
 WebFont.load({
