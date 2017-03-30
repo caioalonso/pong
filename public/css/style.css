@@ -1,15 +1,65 @@
 @font-face {
-  font-family: FFF;
-  src: url('../fonts/fff.ttf');
+  font-family:FFF;
+  src:url('../fonts/fff.ttf');
 }
 
 body {
   margin:0;
   padding:0;
   background:black;
+  color:white;
+  text-align:center;
 }
 
 canvas {
-  margin: 0 auto;
+  margin:0 auto;
   display:block;
 }
+
+section#pregame {
+  display:none;
+}
+
+h1 {
+  font-family:FFF;
+  font-size:4rem;
+}
+
+input, button {
+  font-weight:bold;
+}
+
+input {
+  border:2px solid white;
+  background:#222;
+  color:white;
+  padding:0.5em;
+}
+
+button {
+  margin-top:1rem;
+  padding:0.7rem 1rem;
+  background:white;
+  border:4px solid black;
+  font-size:1.5rem;
+  display: inline-block;
+  cursor: pointer;
+}
+
+button:hover {
+  background:black;
+  color:white;
+}
+
+button:active {
+  border-color:white;
+}
+
+footer {
+  margin-top:3rem;
+}
+
+footer a {
+  color:white;
+}
+

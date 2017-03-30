@@ -8,15 +8,21 @@ import { GAME } from '../shared/config'
 import { registerAction } from './keyboard'
 import { contain, horizontalMovement, verticalMovement } from './physics'
 
-var socket = IO()
-socket.on('sync', data => {
-  rectangle2.y = data.y
-})
-
 var renderer, stage, topBar, bottomBar, line, rectangle, rectangle2, ball
 var message, message2
+var room
 
 function setup () {
+  var socket = IO()
+  socket.on('connect', () => {
+    room = getURLRoom()
+    socket.emit('room', room)
+  })
+
+  socket.on('sync', data => {
+    rectangle2.y = data.y
+  })
+
   renderer = autoDetectRenderer()
   stage = new Container()
 
@@ -101,6 +107,15 @@ function setup () {
   gameLoop()
 }
 
+function getURLRoom () {
+  var room = window.location.href.split('/').pop()
+  if(room != '') {
+    return room
+  } else {
+    return null
+  }
+}
+
 function resizeInterface (event) {
   var ratio = Math.min(window.innerWidth/800, window.innerHeight/600)
   var newWidth = Math.ceil(800 * ratio)
@@ -126,10 +141,35 @@ function gameLoop () {
   renderer.render(stage)
 }
 
+function start () {
+  if(getURLRoom() !== null) {
+    setup()
+  } else {
+    document.getElementById('pregame').style.display = 'block'
+  }
+}
+
+var button = document.getElementById('join')
+button.onclick = () => {
+  var roomName = document.getElementById('roomName').value
+  if(roomName === '') {
+    roomName = stringGen(8)
+  }
+  window.location.href = roomName
+}
+
+function stringGen (len) {
+    var text = ' '
+    var charset = 'abcdefghijklmnopqrstuvwxyz0123456789'
+    for(var i=0; i < len; i++) {
+      text += charset.charAt(Math.floor(Math.random() * charset.length))
+    }
+    return text
+}
+
 WebFont.load({
   custom: {
     families: ['FFF']
   },
-  active: setup
+  active: start
 })
-

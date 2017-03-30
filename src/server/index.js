@@ -19,8 +19,13 @@ server.listen(WEB_PORT, () => {
 })
 app.use(STATIC_PATH, express.static('dist'))
 app.use(STATIC_PATH, express.static('public'))
-app.get('/', (req, res) => res.send(renderApp(APP_NAME)))
+app.get('/:room?', (req, res) => res.send(renderApp(APP_NAME)))
 
-io.on('connection', (socket) => {
-  socket.on('sync', (msg) => io.emit('sync', msg))
+io.on('connection', socket => {
+  var currentRoom
+  socket.on('room', room => {
+    socket.join(room)
+    currentRoom = room
+  })
+  socket.on('sync', msg => socket.in(currentRoom).emit('sync', msg))
 })
