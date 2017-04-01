@@ -1,6 +1,7 @@
 var keys = {
   'up': [getKey(38), getKey(75)],
-  'down': [getKey(40), getKey(74)]
+  'down': [getKey(40), getKey(74)],
+  'space': [getKey(32)]
 }
 
 function getKey (keyCode) {

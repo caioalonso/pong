@@ -26,6 +26,17 @@ io.on('connection', socket => {
   socket.on('room', room => {
     socket.join(room)
     currentRoom = room
+
+    io.in(currentRoom).clients((error, clients) => {
+      if (error) throw error
+
+      io.to(currentRoom).emit('joined', {
+        id: socket.id,
+        clientNo: clients.length
+      })
+    })
+
   })
-  socket.on('sync', msg => socket.in(currentRoom).emit('sync', msg))
+  socket.on('ready', msg => socket.to(currentRoom).emit('ready'))
+  socket.on('sync', msg => socket.to(currentRoom).emit('sync', msg))
 })

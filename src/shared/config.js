@@ -6,6 +6,7 @@ export const GAME = {
   barHeight: 10,
   centerSpacing: 60,
   topPadding: 10,
+  readyPadding: 200,
   rectWidth: 10,
   rectHeight: () => window.innerHeight / 10,
   rectMargin: 20,
