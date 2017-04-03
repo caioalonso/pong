@@ -161,7 +161,8 @@ function setupNetwork () {
           x: ball.x,
           vy: ball.vy,
           vx: ball.vx
-        }
+        },
+        score
       }
       socket.json.emit('sync', toSend)
     }, 30)
@@ -187,6 +188,7 @@ function setupNetwork () {
     }
 
     if(isInEnemySide(ball)) {
+      score = data.score
       ball.x = data.ball.x
       ball.y = data.ball.y
       ball.vx = data.ball.vx
@@ -275,8 +277,6 @@ function startMatch () {
   }, 800*2)
   setTimeout(() => {
     setInfo('')
-    scoreMsg[0].text = score[0]
-    scoreMsg[1].text = score[1]
     ball.beginFill(0xFFFFFF)
     ball.drawRect(0, 0, GAME.ballSize(), GAME.ballSize())
     ball.endFill()
@@ -317,6 +317,8 @@ function gameLoop () {
     verticalMovement(ball, topBar, bottomBar)
     checkScore()
     checkWin()
+    scoreMsg[0].text = score[0]
+    scoreMsg[1].text = score[1]
   }
 
   renderer.render(stage)
@@ -325,11 +327,9 @@ function gameLoop () {
 function checkScore () {
   if(ball.x < 0) {
     score[1] += 1
-    scoreMsg[1].text = score[1]
     if(player === 0) resetBall(1)
   } else if(ball.x > renderer.width) {
     score[0] += 1
-    scoreMsg[0].text = score[0]
     if(player === 1) resetBall(-1)
   }
 }
