@@ -150,7 +150,15 @@ function setupNetwork () {
       () => {})
 
     setInterval(() => {
-      var info = {y: playerRect.y}
+      var info = {
+        y: playerRect.y,
+        ball: {
+          y: ball.y,
+          x: ball.x,
+          vy: ball.vy,
+          vx: ball.vx
+        }
+      }
       socket.json.emit('sync', info)
     }, 30)
   })
@@ -173,7 +181,24 @@ function setupNetwork () {
     } else {
       rectangle.y = data.y
     }
+
+    console.log(isInEnemySide(ball))
+
+    if(isInEnemySide(ball)) {
+      ball.x = data.ball.x
+      ball.y = data.ball.y
+      ball.vx = data.ball.vx
+      ball.vy = data.ball.vy
+    }
   })
+}
+
+function isInEnemySide(ball) {
+  if(player == 0) {
+    return ball.x > renderer.width / 2
+  } else {
+    return ball.x < renderer.width / 2
+  }
 }
 
 function imReady () {
