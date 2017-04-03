@@ -37,6 +37,13 @@ io.on('connection', socket => {
     })
 
   })
+
+  socket.on('disconnecting', () => {
+    Object.keys(socket.rooms).forEach((room) => {
+      socket.to(room).emit('disconnected', socket.id)
+    })
+  })
+
   socket.on('ready', msg => socket.to(currentRoom).emit('ready'))
   socket.on('sync', msg => socket.to(currentRoom).emit('sync', msg))
 })

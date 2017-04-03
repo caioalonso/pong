@@ -156,6 +156,15 @@ function setupNetwork () {
     }, 30)
   })
 
+  socket.on('disconnected', id => {
+    console.log(id)
+    player = 0
+    playerRect = rectangle
+    gameStatus = 'waiting'
+    changeInfo('Waiting for second player...')
+    unReady()
+  })
+
   socket.on('ready', () => makeReady(!player))
 
   socket.on('sync', (data) => {
@@ -190,6 +199,19 @@ function makeReady (player) {
     ready2.text = 'Ready'
     ready2.position.set(renderer.width - renderer.width / 4 - ready2.width / 2, GAME.readyPadding)
   }
+}
+
+function unReady () {
+  ready1.text = ''
+  ready2.text = ''
+  readyBar1.beginFill(0x000000)
+  readyBar1.drawRect(0, 0, renderer.width / 2, renderer.height)
+  readyBar1.endFill()
+  readyBar1.position.set(0, 0)
+  readyBar2.beginFill(0x000000)
+  readyBar2.drawRect(0, 0, renderer.width / 2, renderer.height)
+  readyBar2.endFill()
+  readyBar2.position.set(renderer.width / 2, 0)
 }
 
 function changeInfo(text) {
