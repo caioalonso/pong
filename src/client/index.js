@@ -327,10 +327,13 @@ function checkScore() {
 }
 
 function resetBall(vx) {
-  ball.position.set(renderer.width / 2 + vx, renderer.height / 2 - ball.height / 2)
+  ball.position.set((renderer.width / 2) - vx * 100, renderer.height / 2 - ball.height / 2)
   ball.vx = vx
   ball.vy = 0
-  ball.speed = 5
+  ball.speed = 0
+  setTimeout(() => {
+    ball.speed = 5
+  }, 800)
 }
 
 function start () {
