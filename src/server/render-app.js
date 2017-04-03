@@ -15,7 +15,7 @@ const renderApp = (title) =>
     <input id="roomName" placeholder="Room name (optional)"><br>
     <button id="join">JOIN ROOM</button>
     <footer><small>
-    © 2016 <a href="https://github.com/caioalonso/pong">Caio Alonso</a>
+    © 2017 <a href="https://github.com/caioalonso/pong">Caio Alonso</a>
     </small></footer>
   </section>
   <script src="${isProd ? STATIC_PATH : `http://localhost:${WDS_PORT}/dist`}/js/bundle.js"></script>

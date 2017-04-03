@@ -10,7 +10,9 @@ import { contain, horizontalMovement, verticalMovement } from './physics'
 
 var renderer, stage, topBar, bottomBar, line, rectangle, rectangle2, ball
 var readyBar1, readyBar2, ready1, ready2
-var message, message2, info
+var scoreMsg= []
+var info
+var score = [0, 0]
 var socket
 var room
 var gameStatus = 'disconnected'
@@ -78,13 +80,13 @@ function setup () {
   info.position.set(renderer.width / 2 - info.width / 2, GAME.topPadding)
   stage.addChild(info)
 
-  message = new Text('', scoreStyle)
-  message.position.set(renderer.width / 2 + GAME.centerSpacing, GAME.topPadding)
-  stage.addChild(message)
+  scoreMsg[0] = new Text('', scoreStyle)
+  scoreMsg[0].position.set(renderer.width / 2 + GAME.centerSpacing, GAME.topPadding)
+  stage.addChild(scoreMsg[0])
 
-  message2 = new Text('', scoreStyle)
-  message2.position.set(renderer.width / 2 - message2.width - GAME.centerSpacing, GAME.topPadding)
-  stage.addChild(message2)
+  scoreMsg[1] = new Text('', scoreStyle)
+  scoreMsg[1].position.set(renderer.width / 2 - scoreMsg[1].width - GAME.centerSpacing, GAME.topPadding)
+  stage.addChild(scoreMsg[1])
 
   rectangle = new Graphics()
   rectangle.beginFill(0xFFFFFF)
@@ -150,7 +152,7 @@ function setupNetwork () {
       () => {})
 
     setInterval(() => {
-      var info = {
+      var toSend = {
         y: playerRect.y,
         ball: {
           y: ball.y,
@@ -159,7 +161,7 @@ function setupNetwork () {
           vx: ball.vx
         }
       }
-      socket.json.emit('sync', info)
+      socket.json.emit('sync', toSend)
     }, 30)
   })
 
@@ -181,8 +183,6 @@ function setupNetwork () {
     } else {
       rectangle.y = data.y
     }
-
-    console.log(isInEnemySide(ball))
 
     if(isInEnemySide(ball)) {
       ball.x = data.ball.x
@@ -262,6 +262,7 @@ function resizeInterface (event) {
 }
 
 function startMatch () {
+  gameStatus = 'playing'
   unReady()
   changeInfo('3')
   setTimeout(() => {
@@ -272,8 +273,8 @@ function startMatch () {
   }, 800*2)
   setTimeout(() => {
     changeInfo('')
-    message.text = '0'
-    message2.text = '0'
+    scoreMsg[0].text = '0'
+    scoreMsg[1].text = '0'
     ball.beginFill(0xFFFFFF)
     ball.drawRect(0, 0, GAME.ballSize(), GAME.ballSize())
     ball.endFill()
@@ -288,8 +289,9 @@ function startMatch () {
 function stopMatch () {
   unReady()
   changeInfo('')
-  message.text = ''
-  message2.text = ''
+  score = [0,0]
+  scoreMsg[0].text = ''
+  scoreMsg[1].text = ''
   stage.removeChild(ball)
 }
 
@@ -304,10 +306,31 @@ function gameLoop () {
 
   playerRect.y += playerRect.vy
   contain(rectangle, container)
+  contain(rectangle2, container)
   horizontalMovement(ball, rectangle, rectangle2)
   verticalMovement(ball, topBar, bottomBar)
+  checkScore()
 
   renderer.render(stage)
+}
+
+function checkScore() {
+  if(ball.x < 0) {
+    score[1] += 1
+    scoreMsg[1].text = score[1]
+    resetBall(1)
+  } else if(ball.x > renderer.width) {
+    score[0] += 1
+    scoreMsg[0].text = score[0]
+    resetBall(-1)
+  }
+}
+
+function resetBall(vx) {
+  ball.position.set(renderer.width / 2 + vx, renderer.height / 2 - ball.height / 2)
+  ball.vx = vx
+  ball.vy = 0
+  ball.speed = 5
 }
 
 function start () {
@@ -328,12 +351,12 @@ button.onclick = () => {
 }
 
 function stringGen (len) {
-    var text = ' '
-    var charset = 'abcdefghijklmnopqrstuvwxyz0123456789'
-    for(var i=0; i < len; i++) {
-      text += charset.charAt(Math.floor(Math.random() * charset.length))
-    }
-    return text
+  var text = ' '
+  var charset = 'abcdefghijklmnopqrstuvwxyz0123456789'
+  for(var i=0; i < len; i++) {
+    text += charset.charAt(Math.floor(Math.random() * charset.length))
+  }
+  return text
 }
 
 WebFont.load({
