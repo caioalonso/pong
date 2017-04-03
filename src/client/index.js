@@ -36,7 +36,6 @@ var readyStyle = {
 }
 
 function setup () {
-
   renderer = autoDetectRenderer()
   stage = new Container()
   document.body.appendChild(renderer.view)
@@ -80,6 +79,7 @@ function setup () {
   stage.addChild(info)
 
   message = new Text('', scoreStyle)
+  message.position.set(renderer.width / 2 + GAME.centerSpacing, GAME.topPadding)
   stage.addChild(message)
 
   message2 = new Text('', scoreStyle)
@@ -137,7 +137,6 @@ function setupNetwork () {
     registerAction('up',
       () => {
         playerRect.vy = -7
-        console.log(playerRect == rectangle2)
       }
           ,
       () => playerRect.vy = 0)
@@ -157,15 +156,16 @@ function setupNetwork () {
   })
 
   socket.on('disconnected', id => {
-    console.log(id)
+    stopMatch()
     player = 0
     playerRect = rectangle
     gameStatus = 'waiting'
     changeInfo('Waiting for second player...')
-    unReady()
   })
 
   socket.on('ready', () => makeReady(!player))
+
+  socket.on('start', () => startMatch())
 
   socket.on('sync', (data) => {
     if(player == 0) {
@@ -237,16 +237,35 @@ function resizeInterface (event) {
 }
 
 function startMatch () {
-  message.text = '0'
-  message2.text = '0'
-  ball.beginFill(0xFFFFFF)
-  ball.drawRect(0, 0, GAME.ballSize(), GAME.ballSize())
-  ball.endFill()
-  ball.position.set(renderer.width / 2, renderer.height / 2 - ball.height / 2)
-  ball.vx = -1
-  ball.vy = 0
-  ball.speed = 5
-  stage.addChild(ball)
+  unReady()
+  changeInfo('3')
+  setTimeout(() => {
+    changeInfo('2')
+  }, 800)
+  setTimeout(() => {
+    changeInfo('1')
+  }, 800*2)
+  setTimeout(() => {
+    changeInfo('')
+    message.text = '0'
+    message2.text = '0'
+    ball.beginFill(0xFFFFFF)
+    ball.drawRect(0, 0, GAME.ballSize(), GAME.ballSize())
+    ball.endFill()
+    ball.position.set(renderer.width / 2, renderer.height / 2 - ball.height / 2)
+    ball.vx = -1
+    ball.vy = 0
+    ball.speed = 5
+    stage.addChild(ball)
+  }, 800*3)
+}
+
+function stopMatch () {
+  unReady()
+  changeInfo('')
+  message.text = ''
+  message2.text = ''
+  stage.removeChild(ball)
 }
 
 function gameLoop () {

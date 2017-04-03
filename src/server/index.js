@@ -21,9 +21,12 @@ app.use(STATIC_PATH, express.static('dist'))
 app.use(STATIC_PATH, express.static('public'))
 app.get('/:room?', (req, res) => res.send(renderApp(APP_NAME)))
 
+var rooms = {}
+
 io.on('connection', socket => {
   var currentRoom
   socket.on('room', room => {
+    rooms[room] = { ready:0 }
     socket.join(room)
     currentRoom = room
 
@@ -44,6 +47,13 @@ io.on('connection', socket => {
     })
   })
 
-  socket.on('ready', msg => socket.to(currentRoom).emit('ready'))
+  socket.on('ready', msg => {
+    socket.to(currentRoom).emit('ready')
+    rooms[currentRoom].ready += 1
+    if(rooms[currentRoom].ready == 2) {
+      io.to(currentRoom).emit('start')
+    }
+  })
   socket.on('sync', msg => socket.to(currentRoom).emit('sync', msg))
 })
+
