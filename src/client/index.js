@@ -88,7 +88,7 @@ function setup () {
 
   rectangle = new Graphics()
   rectangle.beginFill(0xFFFFFF)
-  rectangle.drawRect(0, 0, GAME.rectWidth, GAME.rectHeight())
+  rectangle.drawRect(0, 0, GAME.rectWidth, GAME.rectHeight)
   rectangle.endFill()
   rectangle.position.set(GAME.rectMargin, renderer.height / 2 - rectangle.height / 2)
   rectangle.vy = 0
@@ -96,7 +96,7 @@ function setup () {
 
   rectangle2 = new Graphics()
   rectangle2.beginFill(0xFFFFFF)
-  rectangle2.drawRect(0, 0, GAME.rectWidth, GAME.rectHeight())
+  rectangle2.drawRect(0, 0, GAME.rectWidth, GAME.rectHeight)
   rectangle2.endFill()
   rectangle2.position.set(
     renderer.width - rectangle2.width - GAME.rectMargin,
