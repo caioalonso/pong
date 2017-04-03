@@ -52,6 +52,7 @@ io.on('connection', socket => {
     rooms[currentRoom].ready += 1
     if(rooms[currentRoom].ready == 2) {
       io.to(currentRoom).emit('start')
+      rooms[currentRoom].ready = 0
     }
   })
   socket.on('sync', msg => socket.to(currentRoom).emit('sync', msg))

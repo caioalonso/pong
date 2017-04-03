@@ -109,6 +109,8 @@ function setup () {
   playerRect = rectangle2
 
   ball = new Graphics()
+  ball.x = 10
+  ball.y = 10
 
   window.onresize = resizeInterface
   resizeInterface()
@@ -130,10 +132,10 @@ function setupNetwork () {
       player = 0
       playerRect = rectangle
       gameStatus = 'waiting'
-      changeInfo('Waiting for second player...')
+      setInfo('Waiting for Player 2...')
     } else if(data.clientNo === 2) {
       gameStatus = 'readiness'
-      changeInfo('Press space to be ready')
+      setInfo('Press space to be ready')
     }
 
     registerAction('up',
@@ -170,7 +172,7 @@ function setupNetwork () {
     player = 0
     playerRect = rectangle
     gameStatus = 'waiting'
-    changeInfo('Waiting for second player...')
+    setInfo('Waiting for second player...')
   })
 
   socket.on('ready', () => makeReady(!player))
@@ -239,7 +241,7 @@ function unReady () {
   readyBar2.position.set(renderer.width / 2, 0)
 }
 
-function changeInfo(text) {
+function setInfo(text) {
   info.text = text
   info.position.set(renderer.width / 2 - info.width / 2, GAME.topPadding)
 }
@@ -264,17 +266,17 @@ function resizeInterface (event) {
 function startMatch () {
   gameStatus = 'playing'
   unReady()
-  changeInfo('3')
+  setInfo('3')
   setTimeout(() => {
-    changeInfo('2')
+    setInfo('2')
   }, 800)
   setTimeout(() => {
-    changeInfo('1')
+    setInfo('1')
   }, 800*2)
   setTimeout(() => {
-    changeInfo('')
-    scoreMsg[0].text = '0'
-    scoreMsg[1].text = '0'
+    setInfo('')
+    scoreMsg[0].text = score[0]
+    scoreMsg[1].text = score[1]
     ball.beginFill(0xFFFFFF)
     ball.drawRect(0, 0, GAME.ballSize(), GAME.ballSize())
     ball.endFill()
@@ -288,7 +290,10 @@ function startMatch () {
 
 function stopMatch () {
   unReady()
-  changeInfo('')
+  ball.vx = 0
+  ball.vy = 0
+  ball.speed = 0
+  setInfo('')
   score = [0,0]
   scoreMsg[0].text = ''
   scoreMsg[1].text = ''
@@ -307,26 +312,29 @@ function gameLoop () {
   playerRect.y += playerRect.vy
   contain(rectangle, container)
   contain(rectangle2, container)
-  horizontalMovement(ball, rectangle, rectangle2)
-  verticalMovement(ball, topBar, bottomBar)
-  checkScore()
+  if(gameStatus === 'playing') {
+    horizontalMovement(ball, rectangle, rectangle2)
+    verticalMovement(ball, topBar, bottomBar)
+    checkScore()
+    checkWin()
+  }
 
   renderer.render(stage)
 }
 
-function checkScore() {
+function checkScore () {
   if(ball.x < 0) {
     score[1] += 1
     scoreMsg[1].text = score[1]
-    resetBall(1)
+    if(player === 0) resetBall(1)
   } else if(ball.x > renderer.width) {
     score[0] += 1
     scoreMsg[0].text = score[0]
-    resetBall(-1)
+    if(player === 1) resetBall(-1)
   }
 }
 
-function resetBall(vx) {
+function resetBall (vx) {
   ball.position.set((renderer.width / 2) - vx * 100, renderer.height / 2 - ball.height / 2)
   ball.vx = vx
   ball.vy = 0
@@ -334,6 +342,20 @@ function resetBall(vx) {
   setTimeout(() => {
     ball.speed = 5
   }, 800)
+}
+
+function checkWin () {
+  var player1 = score[0] === 5
+  var player2 = score[1] === 5
+  if(player1 || player2) {
+    stopMatch()
+    gameStatus = 'readiness'
+  }
+  if(player1) {
+    setInfo('Player 1 wins! Try again?')
+  } else if (player2) {
+    setInfo('Player 2 wins! Try again?')
+  }
 }
 
 function start () {
