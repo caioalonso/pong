@@ -156,11 +156,13 @@ function setupNetwork () {
     setInterval(() => {
       var toSend = {
         y: playerRect.y,
+        vy: playerRect.vy,
         ball: {
           y: ball.y,
           x: ball.x,
           vy: ball.vy,
-          vx: ball.vx
+          vx: ball.vx,
+          speed: ball.speed
         },
         score
       }
@@ -183,8 +185,10 @@ function setupNetwork () {
   socket.on('sync', (data) => {
     if(player == 0) {
       rectangle2.y = data.y
+      rectangle2.vy = data.vy
     } else {
       rectangle.y = data.y
+      rectangle.vy = data.vy
     }
 
     if(isInEnemySide(ball)) {
@@ -193,6 +197,7 @@ function setupNetwork () {
       ball.y = data.ball.y
       ball.vx = data.ball.vx
       ball.vy = data.ball.vy
+      ball.speed = data.ball.speed
     }
   })
 }
@@ -308,8 +313,9 @@ function gameLoop () {
     height: renderer.height - topBar.height
   }
   requestAnimationFrame(gameLoop)
+  rectangle.y += rectangle.vy
+  rectangle2.y += rectangle2.vy
 
-  playerRect.y += playerRect.vy
   contain(rectangle, container)
   contain(rectangle2, container)
   if(gameStatus === 'playing') {
