@@ -198,7 +198,7 @@ function setupNetwork () {
 }
 
 function isInEnemySide(ball) {
-  if(player == 0) {
+  if(player === 0) {
     return ball.x > renderer.width / 2
   } else {
     return ball.x < renderer.width / 2
@@ -325,12 +325,12 @@ function gameLoop () {
 }
 
 function checkScore () {
-  if(ball.x < 0) {
+  if(player == 0 && ball.x < 0) {
     score[1] += 1
-    if(player === 0) resetBall(1)
-  } else if(ball.x > renderer.width) {
+    resetBall(1)
+  } else if(player == 1 && ball.x > renderer.width) {
     score[0] += 1
-    if(player === 1) resetBall(-1)
+    resetBall(-1)
   }
 }
 
