@@ -153,21 +153,7 @@ function setupNetwork () {
       () => imReady(),
       () => {})
 
-    setInterval(() => {
-      var toSend = {
-        y: playerRect.y,
-        vy: playerRect.vy,
-        ball: {
-          y: ball.y,
-          x: ball.x,
-          vy: ball.vy,
-          vx: ball.vx,
-          speed: ball.speed
-        },
-        score
-      }
-      socket.json.emit('sync', toSend)
-    }, 30)
+    setInterval(sendSync, 30)
   })
 
   socket.on('disconnected', id => {
@@ -192,7 +178,12 @@ function setupNetwork () {
     }
 
     if(isInEnemySide(ball)) {
-      score = data.score
+      if(score[0] < data.score[0]) {
+        score[0] = data.score[0]
+      }
+      if(score[1] < data.score[1]) {
+        score[1] = data.score[1]
+      }
       ball.x = data.ball.x
       ball.y = data.ball.y
       ball.vx = data.ball.vx
@@ -200,6 +191,22 @@ function setupNetwork () {
       ball.speed = data.ball.speed
     }
   })
+}
+
+function sendSync () {
+  var toSend = {
+    y: playerRect.y,
+    vy: playerRect.vy,
+    ball: {
+      y: ball.y,
+      x: ball.x,
+      vy: ball.vy,
+      vx: ball.vx,
+      speed: ball.speed
+    },
+    score
+  }
+  socket.json.emit('sync', toSend)
 }
 
 function isInEnemySide(ball) {
@@ -322,9 +329,9 @@ function gameLoop () {
     horizontalMovement(ball, rectangle, rectangle2)
     verticalMovement(ball, topBar, bottomBar)
     checkScore()
-    checkWin()
     scoreMsg[0].text = score[0]
     scoreMsg[1].text = score[1]
+    checkWin()
   }
 
   renderer.render(stage)
@@ -354,6 +361,7 @@ function checkWin () {
   var player1 = score[0] === 5
   var player2 = score[1] === 5
   if(player1 || player2) {
+    sendSync()
     stopMatch()
     gameStatus = 'readiness'
   }
