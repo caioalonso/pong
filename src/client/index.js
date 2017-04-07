@@ -8,6 +8,7 @@ import { GAME } from '../shared/config'
 import { registerAction } from './keyboard'
 import { contain, horizontalMovement, verticalMovement } from './physics'
 
+var $ = document.querySelector.bind(document)
 var renderer, stage, topBar, bottomBar, line, rectangle, rectangle2, ball
 var readyBar1, readyBar2, ready1, ready2
 var scoreMsg= []
@@ -376,13 +377,18 @@ function start () {
   if(getURLRoom() !== null) {
     setup()
   } else {
-    document.getElementById('pregame').style.display = 'block'
+    $('section#pregame').style.display = 'block'
   }
 }
 
-var button = document.getElementById('join')
-button.onclick = () => {
-  var roomName = document.getElementById('roomName').value
+var button = $('button#join')
+var form = $('form#roomForm')
+button.onclick = pickRoom
+form.onsubmit = pickRoom
+
+function pickRoom (event) {
+  event.preventDefault()
+  var roomName = $('input#roomName').value
   if(roomName === '') {
     roomName = stringGen(8)
   }

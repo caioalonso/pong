@@ -12,8 +12,10 @@ const renderApp = (title) =>
 <body>
   <section id="pregame">
     <h1>PONG</h1>
+    <form id="roomForm">
     <input id="roomName" placeholder="Room name (optional)"><br>
-    <button id="join">JOIN ROOM</button>
+    <button type="submit" id="join">JOIN ROOM</button>
+    </form>
     <footer><small>
     © 2017 <a href="https://github.com/caioalonso/pong">Caio Alonso</a>
     </small></footer>
