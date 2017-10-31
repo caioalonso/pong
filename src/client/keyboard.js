@@ -40,7 +40,7 @@ function getKey (keyCode) {
 
 function oppositeIsPressed (keyName) {
   var toCheck
-  if(keyName === 'up') {
+  if (keyName === 'up') {
     toCheck = keys.down
   } else {
     toCheck = keys.up
@@ -50,10 +50,10 @@ function oppositeIsPressed (keyName) {
 }
 
 export function registerAction (keyName, press, release) {
-  for(let key of keys[keyName]) {
+  for (let key of keys[keyName]) {
     key.press = press
     key.release = () => {
-      if(!oppositeIsPressed(keyName)) {
+      if (!oppositeIsPressed(keyName)) {
         release()
       }
     }

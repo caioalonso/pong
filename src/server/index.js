@@ -1,12 +1,11 @@
 'use strict'
 
 import express from 'express'
-import path from 'path'
 import http from 'http'
 import socketio from 'socket.io'
 
 import renderApp from './render-app'
-import { APP_NAME, STATIC_PATH, WEB_PORT } from '../shared/config'
+import { APP_NAME, STATIC_PATH, WEB_PORT, LATENCY } from '../shared/config'
 import { isProd } from '../shared/util'
 
 const app = express()
@@ -25,8 +24,9 @@ var rooms = {}
 
 io.on('connection', socket => {
   var currentRoom
+
   socket.on('room', room => {
-    rooms[room] = { ready:0 }
+    rooms[room] = { ready: 0 }
     socket.join(room)
     currentRoom = room
 
@@ -34,11 +34,10 @@ io.on('connection', socket => {
       if (error) throw error
 
       io.to(currentRoom).emit('joined', {
-        id: socket.id,
-        clientNo: clients.length
+        joined: socket.id,
+        clients: clients
       })
     })
-
   })
 
   socket.on('disconnecting', () => {
@@ -50,11 +49,16 @@ io.on('connection', socket => {
   socket.on('ready', msg => {
     socket.to(currentRoom).emit('ready')
     rooms[currentRoom].ready += 1
-    if(rooms[currentRoom].ready == 2) {
+    if (rooms[currentRoom].ready == 2) {
       io.to(currentRoom).emit('start')
       rooms[currentRoom].ready = 0
     }
   })
-  socket.on('sync', msg => socket.to(currentRoom).emit('sync', msg))
+
+  socket.on('sync', msg => {
+    setTimeout(() => {
+      socket.to(currentRoom).emit('sync', msg)
+    }, LATENCY)
+  })
 })
 

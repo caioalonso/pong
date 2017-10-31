@@ -36,7 +36,7 @@ export function verticalMovement (ball, topBar, bottomBar) {
   } else if (bottomColl) {
     distance = deltaY(ball, bottomBar)
   }
-  if (topColl|| bottomColl) {
+  if (topColl || bottomColl) {
     beforeCollision = distance
     ball.vy *= -1
     afterCollision = ball.vy * ball.speed - distance
@@ -71,7 +71,7 @@ export function horizontalMovement (ball, rectangle, rectangle2) {
   }
 }
 
-function getFutureBall(ball) {
+function getFutureBall (ball) {
   return {
     'y': ball.y + ball.vy * ball.speed,
     'x': ball.x + ball.vx * ball.speed,
@@ -88,10 +88,10 @@ function changeSpeed (ball) {
 
 function changeDirection (ball, collRect) {
   var position = getCollisionPosition(ball, collRect)
-  var angle = (2*1 / collRect.height) * position - 1
-  var cos = Math.cos(angle);
-  var sin = Math.sin(angle);
-  if(ball.vx < 0) {
+  var angle = (2 * 1 / collRect.height) * position - 1
+  var cos = Math.cos(angle)
+  var sin = Math.sin(angle)
+  if (ball.vx < 0) {
     ball.vx = cos
   } else {
     ball.vx = -cos
@@ -124,7 +124,7 @@ function willCollideBottom (futureBall, obj) {
 }
 
 function deltaY (obj1, obj2) {
-  var isOnTop    = obj1.y + obj1.height < obj2.y
+  var isOnTop = obj1.y + obj1.height < obj2.y
   var isOnBottom = obj2.y + obj2.height < obj1.y
   if (isOnTop) {
     return obj2.y - obj1.y - obj1.height
@@ -137,7 +137,7 @@ function deltaY (obj1, obj2) {
 }
 
 function deltaX (obj1, obj2) {
-  var isOnLeft  = obj1.x + obj1.width < obj2.x
+  var isOnLeft = obj1.x + obj1.width < obj2.x
   var isOnRight = obj2.x + obj2.width < obj1.x
   if (isOnLeft) {
     return obj2.x - obj1.x - obj1.width

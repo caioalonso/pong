@@ -12,3 +12,4 @@ export const GAME = {
   rectMargin: 20,
   ballSize: () => window.innerHeight / 100
 }
+export const LATENCY = 20

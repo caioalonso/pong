@@ -3,7 +3,7 @@
 import 'babel-polyfill'
 import IO from 'socket.io-client'
 import WebFont from 'webfontloader'
-import { Graphics, Container, Text, TextStyle, autoDetectRenderer } from 'pixi.js'
+import { Graphics, Container, Text, autoDetectRenderer } from 'pixi.js'
 import { GAME } from '../shared/config'
 import { registerAction } from './keyboard'
 import { contain, horizontalMovement, verticalMovement } from './physics'
@@ -11,7 +11,7 @@ import { contain, horizontalMovement, verticalMovement } from './physics'
 var $ = document.querySelector.bind(document)
 var renderer, stage, topBar, bottomBar, line, rectangle, rectangle2, ball
 var readyBar1, readyBar2, ready1, ready2
-var scoreMsg= []
+var scoreMsg = []
 var info
 var score = [0, 0]
 var socket
@@ -56,6 +56,7 @@ function setup () {
   stage.addChild(ready2)
 
   line = new Graphics()
+  line.cacheAsBitmap = true
   line.lineStyle(4, 0x333333)
   line.moveTo(0, 0)
   line.lineTo(0, renderer.height)
@@ -64,6 +65,7 @@ function setup () {
   stage.addChild(line)
 
   topBar = new Graphics()
+  topBar.cacheAsBitmap = true
   topBar.beginFill(0xFFFFFF)
   topBar.drawRect(0, 0, renderer.width, GAME.barHeight)
   topBar.endFill()
@@ -71,6 +73,7 @@ function setup () {
   stage.addChild(topBar)
 
   bottomBar = new Graphics()
+  bottomBar.cacheAsBitmap = true
   bottomBar.beginFill(0xFFFFFF)
   bottomBar.drawRect(0, 0, renderer.width, GAME.barHeight)
   bottomBar.endFill()
@@ -90,6 +93,7 @@ function setup () {
   stage.addChild(scoreMsg[1])
 
   rectangle = new Graphics()
+  rectangle.cacheAsBitmap = true
   rectangle.beginFill(0xFFFFFF)
   rectangle.drawRect(0, 0, GAME.rectWidth, GAME.rectHeight)
   rectangle.endFill()
@@ -98,6 +102,7 @@ function setup () {
   stage.addChild(rectangle)
 
   rectangle2 = new Graphics()
+  rectangle2.cacheAsBitmap = true
   rectangle2.beginFill(0xFFFFFF)
   rectangle2.drawRect(0, 0, GAME.rectWidth, GAME.rectHeight)
   rectangle2.endFill()
@@ -110,6 +115,7 @@ function setup () {
   playerRect = rectangle2
 
   ball = new Graphics()
+  ball.cacheAsBitmap = true
   ball.x = 10
   ball.y = 10
 
@@ -129,32 +135,36 @@ function setupNetwork () {
   })
 
   socket.on('joined', (data) => {
-    if(data.clientNo === 1) {
-      player = 0
-      playerRect = rectangle
-      gameStatus = 'waiting'
-      setInfo('Waiting for Player 2...')
-    } else if(data.clientNo === 2) {
-      gameStatus = 'readiness'
-      setInfo('Press space to be ready')
+    for (let client in data.clients) {
+      if (data.clients[client] === socket.id) {
+        setPlayer(client)
+      }
     }
+    setState(data.clients.length)
+    console.log('I am player ' + (player + 1))
 
     registerAction('up',
       () => {
         playerRect.vy = -7
       }
           ,
-      () => playerRect.vy = 0)
+      () => {
+        playerRect.vy = 0
+      })
 
     registerAction('down',
-      () => playerRect.vy = 7,
-      () => playerRect.vy = 0)
+      () => {
+        playerRect.vy = 7
+      },
+      () => {
+        playerRect.vy = 0
+      })
 
     registerAction('space',
       () => imReady(),
       () => {})
 
-    setInterval(sendSync, 30)
+    setInterval(sendSync, 10)
   })
 
   socket.on('disconnected', id => {
@@ -170,19 +180,19 @@ function setupNetwork () {
   socket.on('start', () => startMatch())
 
   socket.on('sync', (data) => {
-    if(player == 0) {
+    if (data.player === '1') {
       rectangle2.y = data.y
       rectangle2.vy = data.vy
-    } else {
+    } else if (data.player === 0) {
       rectangle.y = data.y
       rectangle.vy = data.vy
     }
 
-    if(isInEnemySide(ball)) {
-      if(score[0] < data.score[0]) {
+    if (isInEnemySide(ball)) {
+      if (score[0] < data.score[0]) {
         score[0] = data.score[0]
       }
-      if(score[1] < data.score[1]) {
+      if (score[1] < data.score[1]) {
         score[1] = data.score[1]
       }
       ball.x = data.ball.x
@@ -194,8 +204,33 @@ function setupNetwork () {
   })
 }
 
+function setPlayer (number) {
+  if (number === 0) {
+    player = 0
+    playerRect = rectangle
+    gameStatus = 'waiting'
+    setInfo('Waiting for Player 2...')
+  } else if (number === 1) {
+    player = 1
+    playerRect = rectangle2
+    gameStatus = 'readiness'
+    setInfo('Press space to be ready')
+  }
+}
+
+function setState (players) {
+  if (players === 1) {
+    gameStatus = 'waiting'
+    setInfo('Waiting for Player 2...')
+  } else if (players === 2) {
+    gameStatus = 'readiness'
+    setInfo('Press space to be ready')
+  }
+}
+
 function sendSync () {
   var toSend = {
+    player,
     y: playerRect.y,
     vy: playerRect.vy,
     ball: {
@@ -210,8 +245,8 @@ function sendSync () {
   socket.json.emit('sync', toSend)
 }
 
-function isInEnemySide(ball) {
-  if(player === 0) {
+function isInEnemySide (ball) {
+  if (player === 0) {
     return ball.x > renderer.width / 2
   } else {
     return ball.x < renderer.width / 2
@@ -219,21 +254,21 @@ function isInEnemySide(ball) {
 }
 
 function imReady () {
-  if(gameStatus === 'readiness') {
+  if (gameStatus === 'readiness') {
     makeReady(player)
     socket.emit('ready')
   }
 }
 
 function makeReady (player) {
-  if(player == 0) {
+  if (player === 0) {
     readyBar1.beginFill(0x222222)
     readyBar1.drawRect(0, 0, renderer.width / 2, renderer.height)
     readyBar1.endFill()
     readyBar1.position.set(0, 0)
     ready1.text = 'Ready'
     ready1.position.set(renderer.width / 4 - ready1.width / 2, GAME.readyPadding)
-  } else if(player == 1) {
+  } else if (player === 1) {
     readyBar2.beginFill(0x222222)
     readyBar2.drawRect(0, 0, renderer.width / 2, renderer.height)
     readyBar2.endFill()
@@ -256,14 +291,14 @@ function unReady () {
   readyBar2.position.set(renderer.width / 2, 0)
 }
 
-function setInfo(text) {
+function setInfo (text) {
   info.text = text
   info.position.set(renderer.width / 2 - info.width / 2, GAME.topPadding)
 }
 
 function getURLRoom () {
   var room = window.location.href.split('/').pop()
-  if(room != '') {
+  if (room !== '') {
     return room
   } else {
     return null
@@ -271,7 +306,7 @@ function getURLRoom () {
 }
 
 function resizeInterface (event) {
-  var ratio = Math.min(window.innerWidth/800, window.innerHeight/600)
+  var ratio = Math.min(window.innerWidth / 800, window.innerHeight / 600)
   var newWidth = Math.ceil(800 * ratio)
   var newHeight = Math.ceil(600 * ratio)
   renderer.view.style.width = newWidth + 'px'
@@ -287,7 +322,7 @@ function startMatch () {
   }, 800)
   setTimeout(() => {
     setInfo('1')
-  }, 800*2)
+  }, 800 * 2)
   setTimeout(() => {
     setInfo('')
     ball.beginFill(0xFFFFFF)
@@ -298,7 +333,7 @@ function startMatch () {
     ball.vy = 0
     ball.speed = 5
     stage.addChild(ball)
-  }, 800*3)
+  }, 800 * 3)
 }
 
 function stopMatch () {
@@ -307,26 +342,26 @@ function stopMatch () {
   ball.vy = 0
   ball.speed = 0
   setInfo('')
-  score = [0,0]
+  score = [0, 0]
   scoreMsg[0].text = ''
   scoreMsg[1].text = ''
   stage.removeChild(ball)
 }
 
 function gameLoop () {
+  global.requestAnimationFrame(gameLoop)
+  rectangle.y += rectangle.vy
+  rectangle2.y += rectangle2.vy
   var container = {
     x: 0,
     y: topBar.height,
     width: renderer.width,
     height: renderer.height - topBar.height
   }
-  requestAnimationFrame(gameLoop)
-  rectangle.y += rectangle.vy
-  rectangle2.y += rectangle2.vy
 
   contain(rectangle, container)
   contain(rectangle2, container)
-  if(gameStatus === 'playing') {
+  if (gameStatus === 'playing') {
     horizontalMovement(ball, rectangle, rectangle2)
     verticalMovement(ball, topBar, bottomBar)
     checkScore()
@@ -339,16 +374,17 @@ function gameLoop () {
 }
 
 function checkScore () {
-  if(player == 0 && ball.x < 0) {
+  if (player === 0 && ball.x < 0) {
     score[1] += 1
     resetBall(1)
-  } else if(player == 1 && ball.x > renderer.width) {
+  } else if (player === 1 && ball.x > renderer.width) {
     score[0] += 1
     resetBall(-1)
   }
 }
 
 function resetBall (vx) {
+  console.log('Resetting ball...')
   ball.position.set((renderer.width / 2) - vx * 100, renderer.height / 2 - ball.height / 2)
   ball.vx = vx
   ball.vy = 0
@@ -361,12 +397,12 @@ function resetBall (vx) {
 function checkWin () {
   var player1 = score[0] === 5
   var player2 = score[1] === 5
-  if(player1 || player2) {
+  if (player1 || player2) {
     sendSync()
     stopMatch()
     gameStatus = 'readiness'
   }
-  if(player1) {
+  if (player1) {
     setInfo('Player 1 wins! Try again?')
   } else if (player2) {
     setInfo('Player 2 wins! Try again?')
@@ -374,7 +410,7 @@ function checkWin () {
 }
 
 function start () {
-  if(getURLRoom() !== null) {
+  if (getURLRoom() !== null) {
     setup()
   } else {
     $('section#pregame').style.display = 'block'
@@ -389,7 +425,7 @@ form.onsubmit = pickRoom
 function pickRoom (event) {
   event.preventDefault()
   var roomName = $('input#roomName').value
-  if(roomName === '') {
+  if (roomName === '') {
     roomName = stringGen(8)
   }
   window.location.href = roomName
@@ -398,7 +434,7 @@ function pickRoom (event) {
 function stringGen (len) {
   var text = ' '
   var charset = 'abcdefghijklmnopqrstuvwxyz0123456789'
-  for(var i=0; i < len; i++) {
+  for (var i = 0; i < len; i++) {
     text += charset.charAt(Math.floor(Math.random() * charset.length))
   }
   return text

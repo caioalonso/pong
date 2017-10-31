@@ -3,6 +3,8 @@ import path from 'path'
 import { WDS_PORT } from './src/shared/config'
 import { isProd } from './src/shared/util'
 
+var OpenBrowserPlugin = require('open-browser-webpack-plugin')
+
 export default {
   entry: [
     './src/client'
@@ -23,5 +25,8 @@ export default {
   },
   devServer: {
     port: WDS_PORT
-  }
+  },
+  plugins: [
+    new OpenBrowserPlugin({ url: 'http://localhost:3000' })
+  ]
 }
